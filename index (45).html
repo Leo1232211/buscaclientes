@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Hunter — Protecwork</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --brand:#0f766e; --brand-2:#0d9488; --brand-dark:#134e4a;
+    --bg:#f4f4f5; --card:#ffffff; --ink:#1c1917; --line:#e7e5e4; --muted:#78716c; --soft:#fafaf9;
+  }
+  html[data-theme="dark"]{
+    --bg:#0c0a09; --card:#1c1917; --ink:#f5f5f4; --line:#292524; --muted:#a8a29e; --soft:#161310;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);transition:background .2s,color .2s;}
+  svg{display:block;}
+  a{color:inherit;}
+
+  /* Topbar */
+  .top{position:sticky;top:0;z-index:30;background:var(--brand-dark);color:#fff;}
+  .topw{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;}
+  .icobtn{background:rgba(255,255,255,.12);border:none;color:#fff;width:38px;height:38px;border-radius:9px;display:grid;place-items:center;cursor:pointer;flex-shrink:0;}
+  .icobtn:hover{background:rgba(255,255,255,.2);}
+  .ttl{display:flex;align-items:center;gap:10px;}
+  .ttl b{font-size:17px;letter-spacing:-.02em;}
+  .ttl small{display:block;font-size:11px;color:#99f6e4;margin-top:1px;}
+  .top-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+
+  /* Drawer */
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;visibility:hidden;transition:.25s;z-index:40;}
+  .scrim.show{opacity:1;visibility:visible;}
+  .drawer{position:fixed;top:0;left:0;bottom:0;width:270px;background:var(--card);z-index:50;transform:translateX(-100%);transition:transform .25s;display:flex;flex-direction:column;box-shadow:2px 0 20px rgba(0,0,0,.15);}
+  .drawer.show{transform:none;}
+  .dhead{background:var(--brand-dark);color:#fff;padding:18px 18px;}
+  .dhead b{font-size:16px;}
+  .dhead p{font-size:11px;color:#99f6e4;margin-top:2px;}
+  .dnav{padding:10px;flex:1;}
+  .ditem{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:none;color:var(--ink);font-size:14px;font-weight:600;padding:13px 14px;border-radius:10px;cursor:pointer;}
+  .ditem:hover{background:var(--soft);}
+  .ditem.on{background:var(--brand);color:#fff;}
+  .ditem small{display:block;font-weight:400;font-size:11px;opacity:.8;margin-top:1px;}
+  .dfoot{padding:14px;border-top:1px solid var(--line);font-size:11px;color:var(--muted);}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:18px 16px 60px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;}
+  .lbl{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+
+  .modebar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .modepill{font-size:13px;font-weight:700;padding:9px 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;}
+  .modepill.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .daycount{margin-left:auto;font-size:12px;color:var(--muted);}
+
+  .search{display:flex;gap:8px;margin-top:12px;}
+  .search input{flex:1;min-width:0;font-size:15px;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);outline:none;}
+  .search input:focus{border-color:var(--brand);}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+  .chip{font-size:12px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;}
+  .chip:hover{border-color:var(--brand);}
+  .btn{margin-top:14px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-size:15px;font-weight:700;color:#fff;background:var(--brand);border:none;border-radius:10px;padding:12px;cursor:pointer;}
+  .btn:hover{background:var(--brand-dark);}
+  .btn:disabled{opacity:.6;}
+
+  .layout{display:grid;grid-template-columns:300px 1fr;gap:20px;margin-top:8px;}
+  @media(max-width:860px){.layout{grid-template-columns:1fr;}}
+
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center;}
+  .stat .n{font-size:22px;font-weight:800;line-height:1;}
+  .stat .s{font-size:11px;color:var(--muted);margin-top:5px;}
+  .note{font-size:11px;line-height:1.6;color:var(--muted);margin-top:14px;}
+
+  .filters{display:flex;align-items:center;gap:7px;margin-bottom:14px;flex-wrap:wrap;}
+  .fbtn{font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;}
+  .fbtn.on{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+  .fcount{font-size:12px;color:var(--muted);margin-left:auto;}
+
+  .lead{background:var(--card);border:1px solid var(--line);border-radius:13px;overflow:hidden;display:flex;margin-bottom:11px;}
+  .heat{width:5px;flex-shrink:0;}
+  .lbody{flex:1;padding:15px;min-width:0;}
+  .ltop{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .lname{font-size:16px;font-weight:700;letter-spacing:-.01em;word-break:break-word;}
+  .badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;white-space:nowrap;}
+  .meta{display:flex;align-items:center;gap:6px 14px;margin-top:7px;font-size:12px;color:var(--muted);flex-wrap:wrap;}
+  .prio{text-align:right;flex-shrink:0;}
+  .prio .t{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  .prio .v{font-size:20px;font-weight:800;line-height:1;}
+  .prio .x{font-size:10px;font-weight:700;}
+  .acts{display:flex;align-items:center;gap:7px;margin-top:13px;flex-wrap:wrap;}
+  .wa{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#fff;background:#16a34a;border-radius:8px;padding:8px 13px;text-decoration:none;cursor:pointer;}
+  .ghost{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 13px;text-decoration:none;background:var(--card);cursor:pointer;}
+  .gen{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:8px;padding:8px 13px;border:1px solid var(--brand);color:var(--brand);background:var(--card);cursor:pointer;}
+  select.status{margin-left:auto;font-size:12px;font-weight:700;border-radius:8px;padding:8px 9px;border:1px solid;background:var(--card);cursor:pointer;}
+
+  .state{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:40px 22px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6;}
+  .spinner{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--brand);border-radius:50%;margin:0 auto 14px;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .err{color:#dc2626;}
+
+  /* Dashboard */
+  .dash{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+  @media(max-width:680px){.dash{grid-template-columns:1fr 1fr;}}
+  .dcard{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px;}
+  .dcard .n{font-size:28px;font-weight:800;line-height:1;}
+  .dcard .s{font-size:12px;color:var(--muted);margin-top:6px;}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;padding:16px;z-index:60;}
+  .overlay.show{display:grid;}
+  .modal{background:var(--card);border-radius:16px;max-width:540px;width:100%;overflow:hidden;border:1px solid var(--line);}
+  .mhead{background:var(--brand-dark);color:#fff;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;}
+  .mhead b{font-size:14px;}
+  .mclose{background:none;border:none;color:#99f6e4;font-size:24px;cursor:pointer;line-height:1;}
+  .mbody{padding:18px;}
+  .variants{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap;}
+  .vbtn{font-size:11px;font-weight:700;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;}
+  .vbtn.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+  .msg{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:15px;font-size:14px;line-height:1.6;white-space:pre-wrap;}
+  .macts{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap;}
+  .copy{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#fff;background:var(--brand);border:none;border-radius:8px;padding:10px 16px;cursor:pointer;}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="topw">
+      <button class="icobtn" id="menuBtn" aria-label="Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="ttl">
+        <div><b>Lead Hunter</b><small id="topsub">Prospecção · Ponta Grossa</small></div>
+      </div>
+      <div class="top-right">
+        <button class="icobtn" id="themeBtn" aria-label="Tema">
+          <svg id="themeIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer">
+    <div class="dhead"><b>Lead Hunter</b><p>Sua central de prospecção</p></div>
+    <nav class="dnav">
+      <button class="ditem on" data-view="site"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></span><span>Vender Site<small>Empresas sem site</small></span></button>
+      <button class="ditem" data-view="sst"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></span><span>Protecwork (SST)<small>Treinamentos, laudos, consultoria</small></span></button>
+      <button class="ditem" data-view="contatos"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg></span><span>Meus Contatos<small>Acompanhe suas vendas</small></span></button>
+    </nav>
+    <div class="dfoot">Tudo salvo neste aparelho. Sem login, só seu.</div>
+  </aside>
+
+  <div class="wrap" id="app"></div>
+
+  <!-- Modal -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="mhead"><b id="mtitle">Mensagem</b><button class="mclose" id="mclose">&times;</button></div>
+      <div class="mbody">
+        <div class="variants" id="variants" style="display:none;"></div>
+        <div class="msg" id="mmsg"></div>
+        <div class="macts">
+          <button class="copy" id="copy">Copiar mensagem</button>
+          <a class="wa" id="mwa" target="_blank" style="padding:10px 16px;">Enviar no WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ============ CHAVE (restrita ao domínio no Google Cloud) ============
+const KEY = "AIzaSyC-xpZ1RJZOWVl5bzyN6s7C3rR3KDlNrd8";
+const CIDADE = "Ponta Grossa PR";
+
+// ============ Persistência ============
+const store = {
+  get(k,def){ try{ return JSON.parse(localStorage.getItem(k)) ?? def; }catch(e){ return def; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let contatos = store.get("lh_contatos", {});      // {id: {..., status}}
+let theme = store.get("lh_theme", "light");
+let dayCount = store.get("lh_daycount", {date:"", n:0});
+
+// ============ Estado ============
+let view = "site";
+let leads = [];
+let filtro = "Todos";
+let categoria = "";
+let modalLead = null, modalVariant = "A";
+
+// ============ Catálogos ============
+const SITE_PRESETS = ["Restaurantes","Padarias","Academias","Oficinas mecânicas","Clínicas odontológicas","Salões de beleza","Pet shops","Lojas de roupa","Borracharias","Marmorarias"];
+const SST_PRESETS = ["Metalúrgicas","Construtoras","Madeireiras","Frigoríficos","Serralherias","Transportadoras","Indústrias","Supermercados","Postos de combustível","Oficinas mecânicas","Gráficas","Hospitais"];
+
+const TEMP = {
+  sem:{score:100,label:"Sem site",cor:"#dc2626",bg:"#fef2f2",txt:"Quente"},
+  social:{score:82,label:"Só rede social",cor:"#ea580c",bg:"#fff7ed",txt:"Quente"},
+  fraco:{score:55,label:"Site sem segurança",cor:"#d97706",bg:"#fffbeb",txt:"Morno"},
+  tem:{score:18,label:"Já tem site",cor:"#64748b",bg:"#f1f5f9",txt:"Frio"}
+};
+const SST_TIER = {
+  alto:{cor:"#dc2626",bg:"#fef2f2",label:"Alto potencial",txt:"Quente"},
+  medio:{cor:"#d97706",bg:"#fffbeb",label:"Médio potencial",txt:"Morno"},
+  base:{cor:"#64748b",bg:"#f1f5f9",label:"Potencial base",txt:"Frio"}
+};
+const STATUS = ["Novo","Em conversa","Vendido","Não aceitou"];
+const SCOR = {"Novo":"#0f766e","Em conversa":"#2563eb","Vendido":"#16a34a","Não aceitou":"#9ca3af"};
+
+// ============ Classificação ============
+function classSite(site){
+  if(!site) return "sem";
+  if(/instagram\.com|facebook\.com|linktr\.ee|linktree|wa\.me|api\.whatsapp/i.test(site)) return "social";
+  if(/^http:\/\//i.test(site)) return "fraco";
+  return "tem";
+}
+function tierSST(cat){
+  const c=(cat||"").toLowerCase();
+  if(/metal|metalúrg|metalurg|construt|obra|madeir|serralh|solda|caldeir|frigorí|frigori|quím|quim|transport|plástic|plastic|cerâm|ceram|fundi|usinag|indúst|indust|fábric|fabric|gráf|graf|marmor|pré-mold|premold|tinta|borrach|pedreir|elétric|eletric|telhad|estrutur/.test(c)) return "alto";
+  if(/supermerc|mercado|hospital|clínic|clinic|hotel|posto|combust|lavand|panific|açoug|acoug|distribu|atacad|oficin|autopeç|autopec|farmác|farmac|laticín|laticin|padar|restaurante industrial|cozinha industrial/.test(c)) return "medio";
+  return "base";
+}
+function scoreSST(cat, reviews){
+  const t=tierSST(cat);
+  const base = t==="alto"?80 : t==="medio"?50 : 25;
+  const boost = Math.min(Math.round((reviews||0)/15), 18);
+  return {tier:t, score:Math.min(base+boost,100)};
+}
+
+// ============ Mensagens ============
+function acaoSite(cat){
+  const c=(cat||"").toLowerCase();
+  if(c.includes("restaur")||c.includes("lanch")||c.includes("pizz")) return "escolher onde comer";
+  if(c.includes("padar")) return "achar uma padaria perto";
+  if(c.includes("academ")) return "escolher onde treinar";
+  if(c.includes("oficin")||c.includes("mecân")||c.includes("borrach")) return "achar um serviço de confiança";
+  if(c.includes("odont")||c.includes("dent")) return "escolher um dentista";
+  if(c.includes("salão")||c.includes("salao")||c.includes("beleza")||c.includes("barbe")) return "marcar um horário";
+  if(c.includes("pet")) return "comprar pro pet";
+  if(c.includes("loja")||c.includes("roupa")) return "achar uma loja";
+  return "encontrar e escolher vocês";
+}
+function msgSite(l){
+  const a=acaoSite(l.categoria);
+  const av=l.rating?` (${l.rating}★, ${l.reviews} avaliações)`:"";
+  const m={
+    sem:`Olá! Encontrei o ${l.nome} no Google${av}, mas vi que ainda não tem um site próprio. Hoje muita gente pesquisa no Google antes de ${a}, e um site simples ajuda a ser encontrado e passar mais credibilidade. Posso te mandar uma prévia de como ficaria, sem compromisso?`,
+    social:`Olá! Vi o ${l.nome} no Google e notei que vocês usam a rede social como site. Funciona, mas um site próprio aparece direto no Google, não depende do algoritmo da rede e passa mais profissionalismo pra quem procura ${a}. Quer ver uma prévia?`,
+    fraco:`Olá! Encontrei o ${l.nome} no Google. Vocês têm site, mas reparei que ele está sem o cadeado de segurança (HTTPS), o que afasta clientes e prejudica no Google. Posso te mostrar como deixá-lo moderno e seguro?`,
+    tem:`Olá! Vi o ${l.nome} no Google. Vocês já têm site — se quiser modernizá-lo, melhorar o desempenho no Google ou adicionar agendamento/pedidos online, posso apresentar algumas ideias, sem compromisso.`
+  };
+  return m[l.siteStatus]||m.tem;
+}
+function msgSST(l, variant){
+  const nome = l.nome ? ` (${l.nome})` : "";
+  const A = `Olá! Somos da Protecwork Treinamentos, especializada em Segurança do Trabalho em Ponta Grossa. Empresas do seu segmento têm obrigações legais com as NRs — treinamentos, laudos e documentação. Posso fazer um diagnóstico rápido e gratuito do que a sua empresa${nome} precisa pra ficar 100% regular. Tem 5 minutos pra eu te explicar?`;
+  const B = `Olá! Aqui é da Protecwork Treinamentos (Segurança do Trabalho). A fiscalização do trabalho tem intensificado as autuações, e empresas do seu ramo são obrigadas a manter treinamentos das NRs e laudos em dia — a multa por irregularidade costuma sair bem mais cara que a regularização. Cuidamos de treinamentos, laudos e consultoria pra você. Posso te passar como funciona?`;
+  const C = `Olá! Somos a Protecwork Treinamentos, de Ponta Grossa, especializada em Segurança do Trabalho. Oferecemos treinamentos das NRs, laudos técnicos e consultoria completa pra manter sua empresa regular e seus colaboradores seguros. Trabalhamos com empresas do seu segmento e montamos um pacote sob medida. Posso enviar mais informações?`;
+  return ({A,B,C})[variant] || A;
+}
+function msgDe(l, variant){ return l.modo==="sst" ? msgSST(l, variant||"A") : msgSite(l); }
+
+function waLink(l, variant){
+  if(!l.telefone) return "";
+  let d=l.telefone.replace(/\D/g,"");
+  if(!d.startsWith("55")) d="55"+d;
+  return "https://wa.me/"+d+"?text="+encodeURIComponent(msgDe(l, variant));
+}
+
+// ============ Tema ============
+function applyTheme(){
+  document.documentElement.setAttribute("data-theme", theme);
+  const ic=document.getElementById("themeIcon");
+  if(theme==="dark"){
+    ic.innerHTML='<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+  } else {
+    ic.innerHTML='<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/>';
+  }
+}
+document.getElementById("themeBtn").onclick=()=>{ theme=theme==="dark"?"light":"dark"; store.set("lh_theme",theme); applyTheme(); };
+
+// ============ Drawer ============
+const drawer=document.getElementById("drawer"), scrim=document.getElementById("scrim");
+function openDrawer(){ drawer.classList.add("show"); scrim.classList.add("show"); }
+function closeDrawer(){ drawer.classList.remove("show"); scrim.classList.remove("show"); }
+document.getElementById("menuBtn").onclick=openDrawer;
+scrim.onclick=closeDrawer;
+document.querySelectorAll(".ditem").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll(".ditem").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    view=b.dataset.view; filtro="Todos";
+    closeDrawer(); render();
+  };
+});
+
+// ============ Contagem do dia ============
+function bumpCount(){
+  const hoje=new Date().toISOString().slice(0,10);
+  if(dayCount.date!==hoje){ dayCount={date:hoje,n:0}; }
+  dayCount.n++; store.set("lh_daycount",dayCount);
+}
+function hojeN(){ const hoje=new Date().toISOString().slice(0,10); return dayCount.date===hoje?dayCount.n:0; }
+
+// ============ Salvar contato ============
+function salvarContato(l, status){
+  contatos[l.id]={ id:l.id, nome:l.nome, telefone:l.telefone, endereco:l.endereco,
+    categoria:l.categoria, modo:l.modo, siteStatus:l.siteStatus||null, rating:l.rating, reviews:l.reviews,
+    maps:l.maps, status:status, at:Date.now() };
+  store.set("lh_contatos",contatos);
+}
+function statusDe(id){ return contatos[id] ? contatos[id].status : "Novo"; }
+
+// ============ Busca ============
+async function buscar(){
+  const inp=document.getElementById("campo"); if(!inp) return;
+  const cat=inp.value.trim(); if(!cat){ inp.focus(); return; }
+  categoria=cat; filtro="Todos";
+  const b=document.getElementById("buscarBtn"), bt=document.getElementById("btxt");
+  b.disabled=true; bt.textContent="Buscando...";
+  document.getElementById("resultados").innerHTML=`<div class="state"><div class="spinner"></div>Procurando "${cat}" em Ponta Grossa...</div>`;
+  const stb=document.getElementById("statsBox"); if(stb) stb.innerHTML="";
+  try{
+    const r=await fetch("https://places.googleapis.com/v1/places:searchText",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","X-Goog-Api-Key":KEY,
+        "X-Goog-FieldMask":"places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.googleMapsUri,places.businessStatus"},
+      body:JSON.stringify({textQuery:`${cat} em ${CIDADE}`,languageCode:"pt-BR",regionCode:"BR",maxResultCount:20})
+    });
+    const data=await r.json();
+    if(!r.ok) throw new Error((data.error&&data.error.message)||"Erro na busca.");
+    bumpCount();
+    leads=(data.places||[]).filter(p=>p.businessStatus!=="CLOSED_PERMANENTLY").map(p=>{
+      const site=p.websiteUri||"";
+      const o={ id:p.id, nome:(p.displayName&&p.displayName.text)||"Sem nome", endereco:p.formattedAddress||"",
+        telefone:p.nationalPhoneNumber||p.internationalPhoneNumber||"", site:site,
+        rating:p.rating||null, reviews:p.userRatingCount||0, maps:p.googleMapsUri||"", modo:view };
+      if(view==="sst"){ const s=scoreSST(cat,o.reviews); o.tier=s.tier; o.score=s.score; }
+      else { o.siteStatus=classSite(site); o.score=TEMP[o.siteStatus].score; }
+      return o;
+    }).sort((a,b)=>b.score-a.score);
+    render();
+  }catch(e){
+    document.getElementById("resultados").innerHTML=`<div class="state err">Não foi possível buscar agora.<br><br>${e.message}</div>`;
+  }finally{ b.disabled=false; bt.textContent="Buscar leads"; }
+}
+
+// ============ Modal ============
+function abrir(id){
+  const l=leads.find(x=>x.id===id)||contatos[id]; if(!l) return;
+  modalLead=l; modalVariant="A";
+  document.getElementById("mtitle").textContent=(l.modo==="sst"?"Abordagem Protecwork · ":"Abordagem · ")+l.nome;
+  const vbox=document.getElementById("variants");
+  if(l.modo==="sst"){
+    vbox.style.display="flex";
+    vbox.innerHTML=[["A","Diagnóstico"],["B","Fiscalização"],["C","Completa"]].map(([v,t])=>
+      `<button class="vbtn ${v==="A"?"on":""}" onclick="setVar('${v}')">${t}</button>`).join("");
+  } else vbox.style.display="none";
+  pintarMsg();
+  document.getElementById("overlay").classList.add("show");
+}
+function setVar(v){ modalVariant=v; document.querySelectorAll(".vbtn").forEach(b=>b.classList.toggle("on",b.textContent===({A:"Diagnóstico",B:"Fiscalização",C:"Completa"})[v])); pintarMsg(); }
+function pintarMsg(){
+  document.getElementById("mmsg").textContent=msgDe(modalLead,modalVariant);
+  const a=document.getElementById("mwa"), wa=waLink(modalLead,modalVariant);
+  if(wa){ a.style.display="inline-flex"; a.href=wa; } else { a.style.display="none"; }
+  const c=document.getElementById("copy"); c.textContent="Copiar mensagem";
+  c.onclick=()=>{ navigator.clipboard&&navigator.clipboard.writeText(msgDe(modalLead,modalVariant)); c.textContent="Copiado!"; };
+}
+document.getElementById("mclose").onclick=()=>document.getElementById("overlay").classList.remove("show");
+document.getElementById("overlay").onclick=e=>{ if(e.target.id==="overlay") e.currentTarget.classList.remove("show"); };
+
+// ============ Ações ============
+function mudaStatus(id,v){
+  const l=leads.find(x=>x.id===id)||contatos[id];
+  if(l) salvarContato(l,v);
+  render();
+}
+function removerContato(id){ delete contatos[id]; store.set("lh_contatos",contatos); render(); }
+
+// ============ Render ============
+function badgeDe(l){
+  if(l.modo==="sst"){ const t=SST_TIER[l.tier]||SST_TIER.base; return `<span class="badge" style="background:${t.bg};color:${t.cor}">${t.label}</span>`; }
+  const t=TEMP[l.siteStatus]||TEMP.tem; return `<span class="badge" style="background:${t.bg};color:${t.cor}">${t.label}</span>`;
+}
+function corDe(l){ return l.modo==="sst" ? (SST_TIER[l.tier]||SST_TIER.base).cor : (TEMP[l.siteStatus]||TEMP.tem).cor; }
+function txtDe(l){ return l.modo==="sst" ? (SST_TIER[l.tier]||SST_TIER.base).txt : (TEMP[l.siteStatus]||TEMP.tem).txt; }
+
+function cardLead(l){
+  const st=statusDe(l.id);
+  const opts=STATUS.map(s=>`<option ${s===st?"selected":""}>${s}</option>`).join("");
+  const wa=waLink(l,"A");
+  const waBtn=wa?`<a class="wa" href="${wa}" target="_blank">WhatsApp</a>`:`<span class="ghost" style="opacity:.5">Sem telefone</span>`;
+  const fone=l.telefone?`<span title="Copiar" onclick="navigator.clipboard&&navigator.clipboard.writeText('${l.telefone}')" style="cursor:pointer">${l.telefone}</span>`:"";
+  return `<div class="lead"><div class="heat" style="background:${corDe(l)}"></div><div class="lbody">
+    <div class="ltop"><div style="min-width:0">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="lname">${l.nome}</span>${badgeDe(l)}</div>
+      <div class="meta">${l.endereco?`<span>${l.endereco}</span>`:""}${l.rating?`<span>★ ${l.rating} (${l.reviews})</span>`:`<span>${l.reviews||0} avaliações</span>`}${fone}</div>
+    </div><div class="prio"><div class="t">Prioridade</div><div class="v" style="color:${corDe(l)}">${l.score}</div><div class="x" style="color:${corDe(l)}">${txtDe(l)}</div></div></div>
+    <div class="acts">${waBtn}<button class="gen" onclick="abrir('${l.id}')">Gerar mensagem</button>${l.maps?`<a class="ghost" href="${l.maps}" target="_blank">Maps</a>`:""}
+      <select class="status" style="color:${SCOR[st]};border-color:${SCOR[st]}" onchange="mudaStatus('${l.id}',this.value)">${opts}</select></div>
+  </div></div>`;
+}
+
+function viewBusca(){
+  const presets=view==="sst"?SST_PRESETS:SITE_PRESETS;
+  const ph=view==="sst"?"Ex: metalúrgicas, construtoras...":"Ex: restaurantes, oficinas...";
+  const total=leads.length;
+  let s1,s2;
+  if(view==="sst"){ s1=leads.filter(l=>l.tier==="alto").length; s2=leads.filter(l=>l.tier==="medio").length; }
+  else { s1=leads.filter(l=>l.siteStatus==="sem"||l.siteStatus==="social").length; s2=leads.filter(l=>l.siteStatus==="fraco").length; }
+  const vendidos=leads.filter(l=>statusDe(l.id)==="Vendido").length;
+  const stat=(n,t,c)=>`<div class="stat"><div class="n" style="color:${c||'var(--ink)'}">${n}</div><div class="s">${t}</div></div>`;
+
+  let fopts, resultados;
+  if(!leads.length){
+    fopts=""; resultados=`<div class="state">Digite um segmento ou toque numa sugestão e clique em <b>Buscar leads</b>.</div>`;
+  } else {
+    const fs = view==="sst" ? ["Todos","Alto potencial","Médio","Base"] : ["Todos","Sem site","Site fraco","Já tem site"];
+    const arr=filtrar();
+    fopts=fs.map(f=>`<button class="fbtn ${f===filtro?'on':''}" onclick="setFiltro('${f}')">${f}</button>`).join("")+`<span class="fcount">${arr.length} de ${leads.length}</span>`;
+    resultados=arr.length?arr.map(cardLead).join(""):`<div class="state">Nenhum resultado nesse filtro.</div>`;
+  }
+
+  return `
+  <div class="modebar">
+    <button class="modepill ${view==='site'?'on':''}" onclick="setView('site')">Vender Site</button>
+    <button class="modepill ${view==='sst'?'on':''}" onclick="setView('sst')">Protecwork (SST)</button>
+    <span class="daycount">${hojeN()} buscas hoje</span>
+  </div>
+  <div class="layout">
+    <aside>
+      <div class="card">
+        <span class="lbl">Buscar segmento</span>
+        <div class="search"><input id="campo" type="text" placeholder="${ph}" value="${categoria.replace(/"/g,'&quot;')}"></div>
+        <div class="chips">${presets.map(c=>`<button class="chip" onclick="usar('${c.replace(/'/g,"")}')">${c}</button>`).join("")}</div>
+        <button class="btn" id="buscarBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><span id="btxt">Buscar leads</span></button>
+      </div>
+      <div class="card" style="margin-top:16px"><span class="lbl">Resumo</span>
+        <div class="stats" id="statsBox">${stat(total,"Encontrados")+stat(s1, view==='sst'?'Alto potencial':'Sem site', '#dc2626')+stat(s2, view==='sst'?'Médio':'Site fraco', '#d97706')+stat(vendidos,'Vendidos','#16a34a')}</div>
+      </div>
+      <p class="note">${view==='sst'?'Priorizamos empresas de maior risco (mais NRs obrigatórias) e maior porte. Mude o status pra salvar em Meus Contatos.':'Leads quentes primeiro: quem não tem site ou usa só rede social. Mude o status pra salvar em Meus Contatos.'}</p>
+    </aside>
+    <main>
+      <div class="filters" style="${leads.length?'':'display:none'}">${fopts}</div>
+      <div id="resultados">${resultados}</div>
+    </main>
+  </div>`;
+}
+
+function filtrar(){
+  if(filtro==="Todos") return leads;
+  if(view==="sst"){
+    if(filtro==="Alto potencial") return leads.filter(l=>l.tier==="alto");
+    if(filtro==="Médio") return leads.filter(l=>l.tier==="medio");
+    if(filtro==="Base") return leads.filter(l=>l.tier==="base");
+  } else {
+    if(filtro==="Sem site") return leads.filter(l=>l.siteStatus==="sem"||l.siteStatus==="social");
+    if(filtro==="Site fraco") return leads.filter(l=>l.siteStatus==="fraco");
+    if(filtro==="Já tem site") return leads.filter(l=>l.siteStatus==="tem");
+  }
+  return leads;
+}
+
+function viewContatos(){
+  const arr=Object.values(contatos).sort((a,b)=>b.at-a.at);
+  const c=(s)=>arr.filter(x=>x.status===s).length;
+  const dash=`<div class="dash">
+    <div class="dcard"><div class="n">${arr.length}</div><div class="s">Total de contatos</div></div>
+    <div class="dcard"><div class="n" style="color:#2563eb">${c("Em conversa")}</div><div class="s">Em conversa</div></div>
+    <div class="dcard"><div class="n" style="color:#16a34a">${c("Vendido")}</div><div class="s">Vendidos</div></div>
+    <div class="dcard"><div class="n" style="color:#9ca3af">${c("Não aceitou")}</div><div class="s">Não aceitaram</div></div>
+  </div>`;
+  const fs=["Todos","Novo","Em conversa","Vendido","Não aceitou"];
+  const fopts=fs.map(f=>`<button class="fbtn ${f===filtro?'on':''}" onclick="setFiltro('${f}')">${f}</button>`).join("");
+  let lista;
+  const farr = filtro==="Todos"?arr:arr.filter(x=>x.status===filtro);
+  if(!arr.length){
+    lista=`<div class="state">Você ainda não salvou contatos.<br>Faça uma busca e mude o status de uma empresa pra ela aparecer aqui.</div>`;
+  } else if(!farr.length){
+    lista=`<div class="state">Nenhum contato com esse status.</div>`;
+  } else {
+    lista=farr.map(l=>{
+      const st=l.status, wa=waLink(l,"A");
+      const opts=STATUS.map(s=>`<option ${s===st?"selected":""}>${s}</option>`).join("");
+      return `<div class="lead"><div class="heat" style="background:${SCOR[st]}"></div><div class="lbody">
+        <div class="ltop"><div style="min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="lname">${l.nome}</span><span class="badge" style="background:var(--soft);color:var(--muted)">${l.modo==="sst"?"Protecwork":"Site"}</span></div>
+          <div class="meta">${l.categoria?`<span>${l.categoria}</span>`:""}${l.telefone?`<span>${l.telefone}</span>`:""}</div>
+        </div></div>
+        <div class="acts">${wa?`<a class="wa" href="${wa}" target="_blank">WhatsApp</a>`:""}<button class="gen" onclick="abrir('${l.id}')">Mensagem</button>
+          <button class="ghost" onclick="removerContato('${l.id}')">Remover</button>
+          <select class="status" style="color:${SCOR[st]};border-color:${SCOR[st]}" onchange="mudaStatus('${l.id}',this.value)">${opts}</select></div>
+      </div></div>`;
+    }).join("");
+  }
+  return `<h2 style="font-size:20px;letter-spacing:-.02em;margin-bottom:4px">Meus Contatos</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Seu painel de prospecção — acompanhe quem está em conversa, quem fechou e quem não aceitou.</p>
+    ${dash}<div class="filters">${fopts}</div>${lista}`;
+}
+
+function setView(v){
+  view=v; filtro="Todos";
+  document.querySelectorAll(".ditem").forEach(x=>x.classList.toggle("on",x.dataset.view===v));
+  render();
+}
+function setFiltro(f){ filtro=f; render(); }
+function usar(c){ const i=document.getElementById("campo"); if(i){ i.value=c; buscar(); } }
+
+function render(){
+  const sub=document.getElementById("topsub");
+  sub.textContent = view==="contatos" ? "Seus contatos" : (view==="sst" ? "Modo Protecwork · SST" : "Modo Vender Site");
+  const app=document.getElementById("app");
+  app.innerHTML = view==="contatos" ? viewContatos() : viewBusca();
+  const bb=document.getElementById("buscarBtn"); if(bb) bb.onclick=buscar;
+  const cp=document.getElementById("campo"); if(cp) cp.addEventListener("keydown",e=>{ if(e.key==="Enter") buscar(); });
+}
+
+applyTheme();
+render();
+</script>
+</body>
+</html>
