@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lead Hunter — Ponta Grossa</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{ --brand:#0f766e; --brand-dark:#134e4a; --ink:#1c1917; --line:#e7e5e4; --paper:#f5f5f4; --muted:#78716c; }
+  body{ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--paper); color:var(--ink); }
+  header{ background:var(--brand-dark); color:#fff; }
+  .hwrap{ max-width:1040px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .brand{ display:flex; align-items:center; gap:12px; }
+  .logo{ width:38px; height:38px; border-radius:9px; background:var(--brand); display:grid; place-items:center; flex-shrink:0; }
+  .brand h1{ font-size:18px; letter-spacing:-.02em; line-height:1; }
+  .brand p{ font-size:12px; color:#99f6e4; margin-top:3px; }
+  .tag{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; padding:5px 10px; border-radius:99px; background:rgba(16,185,129,.25); color:#a7f3d0; white-space:nowrap; }
+  .grid{ max-width:1040px; margin:0 auto; padding:24px 20px; display:grid; gap:24px; grid-template-columns:300px 1fr; }
+  @media(max-width:820px){ .grid{ grid-template-columns:1fr; } }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:13px; padding:16px; }
+  .lbl{ font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  .search{ display:flex; gap:8px; margin-top:12px; }
+  .search input{ flex:1; min-width:0; font-size:14px; padding:9px 12px; border:1px solid var(--line); border-radius:9px; outline:none; }
+  .search input:focus{ border-color:var(--brand); }
+  .chips{ display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
+  .chip{ font-size:12px; padding:5px 11px; border-radius:99px; border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; transition:.15s; }
+  .chip:hover{ border-color:var(--brand); }
+  .btn{ width:100%; margin-top:14px; display:flex; align-items:center; justify-content:center; gap:8px; font-size:14px; font-weight:600; color:#fff; background:var(--brand); border:none; border-radius:9px; padding:11px; cursor:pointer; }
+  .btn:hover{ background:var(--brand-dark); }
+  .btn:disabled{ opacity:.6; cursor:default; }
+  .stats{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+  .stat{ border:1px solid var(--line); border-radius:9px; padding:12px; text-align:center; }
+  .stat .n{ font-size:24px; font-weight:700; line-height:1; }
+  .stat .s{ font-size:11px; color:var(--muted); margin-top:5px; }
+  .note{ font-size:11px; line-height:1.6; color:var(--muted); padding:0 4px; margin-top:14px; }
+  .filters{ display:flex; align-items:center; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .fbtn{ font-size:12px; font-weight:500; padding:6px 12px; border-radius:8px; border:1px solid var(--line); background:#fff; color:#57534e; cursor:pointer; }
+  .fbtn.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .fcount{ font-size:12px; color:#a8a29e; margin-left:auto; }
+  .lead{ background:#fff; border:1px solid var(--line); border-radius:13px; overflow:hidden; display:flex; margin-bottom:12px; }
+  .heat{ width:5px; flex-shrink:0; }
+  .lbody{ flex:1; padding:16px; min-width:0; }
+  .ltop{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+  .lname{ font-size:16px; font-weight:700; letter-spacing:-.01em; }
+  .badge{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; padding:2px 9px; border-radius:99px; }
+  .meta{ display:flex; align-items:center; gap:14px; margin-top:7px; font-size:12px; color:var(--muted); flex-wrap:wrap; }
+  .meta span{ display:inline-flex; align-items:center; gap:4px; }
+  .prio{ text-align:right; flex-shrink:0; }
+  .prio .t{ font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:#a8a29e; }
+  .prio .v{ font-size:21px; font-weight:700; line-height:1; }
+  .prio .x{ font-size:10px; font-weight:600; }
+  .acts{ display:flex; align-items:center; gap:8px; margin-top:14px; flex-wrap:wrap; }
+  .wa{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#fff; background:#16a34a; border-radius:8px; padding:7px 12px; text-decoration:none; }
+  .lk{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:#57534e; border:1px solid var(--line); border-radius:8px; padding:7px 12px; text-decoration:none; background:#fff; }
+  .gen{ display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; border-radius:8px; padding:7px 12px; border:1px solid var(--brand); color:var(--brand); background:#fff; cursor:pointer; }
+  select.status{ margin-left:auto; font-size:12px; font-weight:600; border-radius:8px; padding:7px 10px; border:1px solid; background:#fff; cursor:pointer; }
+  .state{ background:#fff; border:1px solid var(--line); border-radius:13px; padding:40px 24px; text-align:center; color:var(--muted); font-size:14px; line-height:1.6; }
+  .spinner{ width:26px; height:26px; border:3px solid var(--line); border-top-color:var(--brand); border-radius:50%; margin:0 auto 14px; animation:spin .8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .err{ color:#b91c1c; }
+  .overlay{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; place-items:center; padding:16px; z-index:50; }
+  .overlay.show{ display:grid; }
+  .modal{ background:#fff; border-radius:16px; max-width:520px; width:100%; overflow:hidden; }
+  .mhead{ background:var(--brand-dark); color:#fff; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; }
+  .mhead b{ font-size:14px; }
+  .mclose{ background:none; border:none; color:#99f6e4; font-size:22px; cursor:pointer; line-height:1; }
+  .mbody{ padding:20px; }
+  .msg{ background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:16px; font-size:14px; line-height:1.6; color:#44403c; white-space:pre-wrap; }
+  .macts{ display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+  .copy{ display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:600; color:#fff; background:var(--brand); border:none; border-radius:8px; padding:9px 16px; cursor:pointer; }
+  svg{ display:block; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="hwrap">
+      <div class="brand">
+        <div class="logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="1.5" fill="#fff"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
+        </div>
+        <div>
+          <h1>Lead Hunter</h1>
+          <p>Prospecção · Ponta Grossa, PR</p>
+        </div>
+      </div>
+      <span class="tag">Dados reais · Google</span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <aside>
+      <div class="card">
+        <span class="lbl">Buscar segmento</span>
+        <div class="search">
+          <input id="campo" type="text" placeholder="Ex: restaurantes, oficinas..." />
+        </div>
+        <div class="chips" id="chips"></div>
+        <button class="btn" id="buscar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <span id="btxt">Buscar leads</span>
+        </button>
+      </div>
+
+      <div class="card" style="margin-top:20px;">
+        <span class="lbl">Resumo da busca</span>
+        <div class="stats" id="stats"></div>
+      </div>
+
+      <p class="note">Leads quentes primeiro: empresas sem site ou que usam só rede social. Seus status (contatado, fechado) ficam salvos neste navegador.</p>
+    </aside>
+
+    <main>
+      <div class="filters" id="filters" style="display:none;"></div>
+      <div id="lista"></div>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="mhead">
+        <b id="mtitle">Abordagem</b>
+        <button class="mclose" id="mclose">&times;</button>
+      </div>
+      <div class="mbody">
+        <span class="lbl" style="font-size:11px;">Mensagem sugerida</span>
+        <div class="msg" id="mmsg" style="margin-top:8px;"></div>
+        <div class="macts">
+          <button class="copy" id="copy">Copiar</button>
+          <a class="wa" id="mwa" target="_blank" style="padding:9px 16px;">Abrir no WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ===================================================================
+//  CHAVE DO GOOGLE — protegida por restrição de domínio no Google Cloud
+// ===================================================================
+const KEY = "AIzaSyC-xpZ1RJZOWVl5bzyN6s7C3rR3KDlNrd8";
+const CIDADE = "Ponta Grossa PR";
+
+const PRESETS = ["Restaurantes","Padarias","Academias","Oficinas mecânicas","Clínicas odontológicas","Salões de beleza","Pet shops","Lojas de roupa","Borracharias","Marmorarias"];
+const TEMP = {
+  sem:{score:100,label:"Sem site",cor:"#dc2626",bg:"#fef2f2",txt:"Quente"},
+  social:{score:82,label:"Só rede social",cor:"#ea580c",bg:"#fff7ed",txt:"Quente"},
+  fraco:{score:55,label:"Site sem segurança",cor:"#d97706",bg:"#fffbeb",txt:"Morno"},
+  tem:{score:18,label:"Já tem site",cor:"#64748b",bg:"#f8fafc",txt:"Frio"}
+};
+const STATUS = ["Novo","Contatado","Interessado","Fechado","Descartado"];
+const SCOR = {Novo:"#0f766e",Contatado:"#2563eb",Interessado:"#7c3aed",Fechado:"#16a34a",Descartado:"#9ca3af"};
+
+let categoria = "", filtro = "Todos", leads = [];
+let salvos = {};
+try { salvos = JSON.parse(localStorage.getItem("lh_status") || "{}"); } catch(e){ salvos = {}; }
+function salvarStatus(){ try { localStorage.setItem("lh_status", JSON.stringify(salvos)); } catch(e){} }
+
+function classificar(site){
+  if(!site) return "sem";
+  if(/instagram\.com|facebook\.com|linktr\.ee|linktree|wa\.me|api\.whatsapp/i.test(site)) return "social";
+  if(/^http:\/\//i.test(site)) return "fraco";
+  return "tem";
+}
+function acaoDe(cat){
+  const c = (cat||"").toLowerCase();
+  if(c.includes("restaur")||c.includes("lanch")||c.includes("pizz")) return "escolher onde comer";
+  if(c.includes("padar")) return "achar uma padaria perto";
+  if(c.includes("academ")) return "escolher onde treinar";
+  if(c.includes("oficin")||c.includes("mecân")||c.includes("borrach")) return "achar um serviço de confiança";
+  if(c.includes("odont")||c.includes("dent")) return "escolher um dentista";
+  if(c.includes("salão")||c.includes("salao")||c.includes("beleza")||c.includes("barbe")) return "marcar um horário";
+  if(c.includes("pet")) return "comprar pro pet";
+  if(c.includes("loja")||c.includes("roupa")) return "achar uma loja";
+  return "encontrar e escolher vocês";
+}
+function mensagem(l){
+  const a = acaoDe(l.categoria||categoria);
+  const aval = l.rating ? ` (${l.rating}★, ${l.reviews} avaliações)` : "";
+  const m = {
+    sem:`Olá! Encontrei o ${l.nome} no Google${aval}, mas vi que ainda não tem um site próprio. Hoje muita gente pesquisa no Google antes de ${a}, e um site simples ajuda a ser encontrado, mostrar seus serviços e passar mais credibilidade. Posso te mandar uma prévia de como ficaria, sem compromisso?`,
+    social:`Olá! Vi o ${l.nome} no Google e notei que vocês usam a rede social como site. Funciona, mas um site próprio aparece direto no Google, não depende do algoritmo da rede e passa mais profissionalismo pra quem está procurando ${a}. Quer que eu te mostre uma prévia?`,
+    fraco:`Olá! Encontrei o ${l.nome} no Google. Vocês têm site, mas reparei que ele está sem o cadeado de segurança (HTTPS), o que afasta clientes e prejudica no Google. Posso te mostrar como deixar ele moderno e seguro?`,
+    tem:`Olá! Vi o ${l.nome} no Google. Vocês já têm site — caso queira modernizá-lo, melhorar o desempenho no Google ou adicionar agendamento/pedidos online, posso te apresentar algumas ideias, sem compromisso.`
+  };
+  return m[l.status] || m.tem;
+}
+function waLink(l){
+  if(!l.telefone) return "";
+  let d = l.telefone.replace(/\D/g,"");
+  if(!d.startsWith("55")) d = "55"+d;
+  return "https://wa.me/"+d+"?text="+encodeURIComponent(mensagem(l));
+}
+
+function renderChips(){
+  document.getElementById("chips").innerHTML = PRESETS.map(c=>
+    `<button class="chip" onclick="usar('${c.replace(/'/g,"")}')">${c}</button>`).join("");
+}
+function usar(c){ document.getElementById("campo").value = c; buscar(); }
+
+function renderStats(){
+  const total=leads.length;
+  const sem=leads.filter(l=>l.status==="sem"||l.status==="social").length;
+  const cont=leads.filter(l=>(salvos[l.id]||"Novo")!=="Novo"&&(salvos[l.id]||"Novo")!=="Descartado").length;
+  const fec=leads.filter(l=>(salvos[l.id]||"")==="Fechado").length;
+  const s=(n,t,c)=>`<div class="stat"><div class="n" style="color:${c||'var(--ink)'}">${n}</div><div class="s">${t}</div></div>`;
+  document.getElementById("stats").innerHTML = s(total,"Encontrados")+s(sem,"Sem site","#dc2626")+s(cont,"Contatados","#2563eb")+s(fec,"Fechados","#16a34a");
+}
+function filtrados(){
+  if(filtro==="Sem site") return leads.filter(l=>l.status==="sem"||l.status==="social");
+  if(filtro==="Site fraco") return leads.filter(l=>l.status==="fraco");
+  if(filtro==="Já tem site") return leads.filter(l=>l.status==="tem");
+  return leads;
+}
+function renderFilters(){
+  const fs=["Todos","Sem site","Site fraco","Já tem site"];
+  const box=document.getElementById("filters");
+  if(!leads.length){ box.style.display="none"; return; }
+  box.style.display="flex";
+  box.innerHTML = fs.map(f=>`<button class="fbtn ${f===filtro?'on':''}" onclick="setFiltro('${f}')">${f}</button>`).join("")
+    + `<span class="fcount">${filtrados().length} de ${leads.length}</span>`;
+}
+function setFiltro(f){ filtro=f; render(); }
+
+function renderLista(){
+  const arr = filtrados();
+  if(!arr.length){
+    document.getElementById("lista").innerHTML = `<div class="state">Nenhum resultado para mostrar. Tente outro segmento.</div>`;
+    return;
+  }
+  document.getElementById("lista").innerHTML = arr.map(l=>{
+    const t=TEMP[l.status]||TEMP.tem;
+    const st=salvos[l.id]||"Novo";
+    const opts=STATUS.map(s=>`<option ${s===st?'selected':''}>${s}</option>`).join("");
+    const wa = waLink(l);
+    const waBtn = wa ? `<a class="wa" href="${wa}" target="_blank">WhatsApp</a>` : `<span class="lk" style="opacity:.5">Sem telefone</span>`;
+    const mapsBtn = l.maps ? `<a class="lk" href="${l.maps}" target="_blank">Ver no Maps</a>` : "";
+    return `<div class="lead">
+      <div class="heat" style="background:${t.cor}"></div>
+      <div class="lbody">
+        <div class="ltop">
+          <div style="min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <span class="lname">${l.nome}</span>
+              <span class="badge" style="background:${t.bg};color:${t.cor}">${t.label}</span>
+            </div>
+            <div class="meta">
+              ${l.endereco?`<span>${l.endereco}</span>`:""}
+              ${l.rating?`<span>★ ${l.rating} (${l.reviews})</span>`:""}
+              ${l.telefone?`<span>${l.telefone}</span>`:""}
+            </div>
+          </div>
+          <div class="prio">
+            <div class="t">Prioridade</div>
+            <div class="v" style="color:${t.cor}">${t.score}</div>
+            <div class="x" style="color:${t.cor}">${t.txt}</div>
+          </div>
+        </div>
+        <div class="acts">
+          ${waBtn}
+          <button class="gen" onclick="abrir('${l.id}')">Gerar mensagem</button>
+          ${mapsBtn}
+          <select class="status" style="color:${SCOR[st]};border-color:${SCOR[st]}" onchange="mudaStatus('${l.id}',this.value)">${opts}</select>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+function mudaStatus(id,v){ salvos[id]=v; salvarStatus(); render(); }
+
+function abrir(id){
+  const l=leads.find(x=>x.id===id); if(!l) return;
+  document.getElementById("mtitle").textContent="Abordagem · "+l.nome;
+  document.getElementById("mmsg").textContent=mensagem(l);
+  const wa=waLink(l); const a=document.getElementById("mwa");
+  if(wa){ a.style.display="inline-flex"; a.href=wa; } else { a.style.display="none"; }
+  const c=document.getElementById("copy"); c.textContent="Copiar";
+  c.onclick=()=>{ navigator.clipboard&&navigator.clipboard.writeText(mensagem(l)); c.textContent="Copiado"; };
+  document.getElementById("overlay").classList.add("show");
+}
+document.getElementById("mclose").onclick=()=>document.getElementById("overlay").classList.remove("show");
+document.getElementById("overlay").onclick=e=>{ if(e.target.id==="overlay") e.currentTarget.classList.remove("show"); };
+
+function render(){ renderStats(); renderFilters(); renderLista(); }
+
+async function buscar(){
+  const cat = document.getElementById("campo").value.trim();
+  if(!cat){ document.getElementById("campo").focus(); return; }
+  categoria = cat; filtro="Todos";
+  const b=document.getElementById("buscar"); const bt=document.getElementById("btxt");
+  b.disabled=true; bt.textContent="Buscando...";
+  document.getElementById("filters").style.display="none";
+  document.getElementById("lista").innerHTML = `<div class="state"><div class="spinner"></div>Procurando "${cat}" em Ponta Grossa...</div>`;
+  document.getElementById("stats").innerHTML = "";
+  try{
+    const r = await fetch("https://places.googleapis.com/v1/places:searchText", {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "X-Goog-Api-Key": KEY,
+        "X-Goog-FieldMask":"places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.googleMapsUri,places.businessStatus"
+      },
+      body: JSON.stringify({ textQuery:`${cat} em ${CIDADE}`, languageCode:"pt-BR", regionCode:"BR", maxResultCount:20 })
+    });
+    const data = await r.json();
+    if(!r.ok){ throw new Error((data.error && data.error.message) || "Erro na busca."); }
+    leads = (data.places||[])
+      .filter(p=>p.businessStatus!=="CLOSED_PERMANENTLY")
+      .map(p=>{
+        const site = p.websiteUri || "";
+        return {
+          id: p.id,
+          nome: (p.displayName && p.displayName.text) || "Sem nome",
+          endereco: p.formattedAddress || "",
+          telefone: p.nationalPhoneNumber || p.internationalPhoneNumber || "",
+          site, status: classificar(site),
+          rating: p.rating || null, reviews: p.userRatingCount || 0,
+          maps: p.googleMapsUri || ""
+        };
+      })
+      .sort((a,b)=>(TEMP[b.status]?.score||0)-(TEMP[a.status]?.score||0));
+    if(!leads.length){
+      document.getElementById("lista").innerHTML = `<div class="state">Nenhuma empresa encontrada para "${cat}". Tente um termo diferente.</div>`;
+    } else { render(); }
+  }catch(e){
+    document.getElementById("lista").innerHTML = `<div class="state err">Não foi possível buscar agora.<br><br>${e.message}<br><br>Se for a primeira vez, confira se a chave já está liberada para o domínio do site.</div>`;
+  }finally{
+    b.disabled=false; bt.textContent="Buscar leads";
+  }
+}
+document.getElementById("buscar").onclick=buscar;
+document.getElementById("campo").addEventListener("keydown",e=>{ if(e.key==="Enter") buscar(); });
+
+renderChips();
+document.getElementById("lista").innerHTML = `<div class="state">Digite um segmento (ex: <b>restaurantes</b>) ou toque numa sugestão acima e clique em <b>Buscar leads</b>.</div>`;
+</script>
+</body>
+</html>
